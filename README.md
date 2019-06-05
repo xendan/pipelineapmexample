@@ -2,6 +2,7 @@
 Example of pipeline that uses APM pefrormance metrics
 
 ## Quick start
+Create file 'apm.properties' using your APM server properties, content should be similar to `apm.example.properties` file.
 ```
 ./gradlew clean runPipeline
 ```
@@ -10,3 +11,48 @@ This will run "pipeline" defined by `pipeline.properties` where:
 `total` defines number of processor, expected >= 3
 
 `ports` defines ports used by processors for communication, expected list of integers of `total`-1 length
+
+## What happens inside
+Gradle task 'runPipeline' build project and run result jar `total` times, to create a pipeline that consist of `total` 
+number of independent processors.
+Each processor except `Source` wait for message on incoming port process it and write new message to outgoing port.
+Source does not read message, it just sent "First message" string.
+
+```
+
+
+     +---------+         +----------+         +----------+           +----------+
+     |         | MESSAGE |          | MESSAGE |          | MESSAGE   |          |
+     |Source   |+------->|Processor1|+------->|Processor2|+--------->|Sink      |
+     +---------+         +----------+         +----------+           +----------+
+```
+
+"Business logic" executed in `PipelineProcessor.thisIsAcutallyABusinessLogic`
+
+```
+ private void thisIsAcutallyABusinessLogic(String message) throws InterruptedException {
+        info("processing message \"" + message + "\"");
+        TimeUnit.SECONDS.sleep(3);
+ }
+```
+To wrap this logic with APM Transactions method  `PipelineProcessor.processMessage`
+
+```
+private String processMessage(String message) throws InterruptedException {
+        Transaction parentTransaction = getOrCreateTransaction(message);
+        Span span = parentTransaction.startSpan();
+        try {
+            span.setName(name);
+            thisIsAcutallyABusinessLogic(message);
+            return  injectParentTransactionId(message, parentTransaction) + ", processed by " + name;
+        } catch (Exception e) {
+            parentTransaction.captureException(e);
+            span.captureException(e);
+            throw e;
+        } finally {
+            span.end();
+            if ("Sink".equals(name)) {
+                parentTransaction.end();
+            }
+        }
+``` 
