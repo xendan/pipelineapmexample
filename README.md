@@ -74,6 +74,7 @@ It could be also OK for us not to have parent transaction, but have span followi
 
 but [open trace bridge documentation](https://www.elastic.co/guide/en/apm/agent/java/current/opentracing-bridge.html) says
 ```
-Currently, this bridge only supports child_of references. Other references, like follows_from are not supported yet.
+Currently, this bridge only supports child_of references. Other references, 
+like follows_from are not supported yet.
 ``` 
 so not sure if it is possible.
