@@ -1,0 +1,61 @@
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
+
+import static java.util.concurrent.TimeUnit.*
+
+plugins {
+    id 'java'
+}
+
+group 'org.pipelineexample'
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
+
+def mainClassName = "org.pipelineexample.apm.ProcessorApplication"
+
+jar {
+    manifest {
+        attributes "Main-Class": "$mainClassName"
+    }
+
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+
+task runPipeline {
+    doLast {
+        def props = new Properties()
+        file("pipeline.properties").withInputStream { props.load(it) }
+        def total = props.getProperty("total").toInteger()
+
+        def taskExecutor = Executors.newFixedThreadPool(total)
+        1.upto(total, {
+            def num = it
+            taskExecutor.execute({javaexec {
+                main="-jar"
+                args = [jar.archivePath, num]
+                }
+            })
+        })
+        
+        taskExecutor.shutdown()
+        try {
+            taskExecutor.awaitTermination(Long.MAX_VALUE, NANOSECONDS)
+        } catch (InterruptedException e) {
+            throw new GradleException("task interupted", e)
+        }
+
+    }
+}
+
+runPipeline.dependsOn.add("jar")
