@@ -1,4 +1,4 @@
-# pipelineapmexample
+# Pipeline APM example
 Just a toy example of pipeline that consist of several java processes communicating by sockets.
  
 This is a desirable result in APM Kibana.
@@ -18,7 +18,7 @@ This will run "pipeline" defined by `pipeline.properties` where:
 
 `ports` defines ports used by processors for communication, expected list of integers of `total`-1 length
 
-## What happens inside
+## More details
 Gradle task `runPipeline` build project and run result jar `total` times, to create a pipeline that consist of `total` 
 number of independent processors.
 Each processor except `Source` wait for message on incoming port, process it and write new message to outgoing port.
@@ -33,7 +33,7 @@ Source does not read message, it just sent "First message" string.
 
 Processor "Business logic" is executed in `PipelineProcessor.thisIsAcutallyABusinessLogic`
 
-```
+```java
  private void thisIsAcutallyABusinessLogic(String message) throws InterruptedException {
         info("processing message \"" + message + "\"");
         TimeUnit.SECONDS.sleep(3);
@@ -41,7 +41,7 @@ Processor "Business logic" is executed in `PipelineProcessor.thisIsAcutallyABusi
 ```
 To wrap this logic with APM Transactions method  `PipelineProcessor.processMessage` is used
 
-```
+```java
 private String processMessage(String message) throws InterruptedException {
         Transaction parentTransaction = getOrCreateTransaction(message);
         Span span = parentTransaction.startSpan();
