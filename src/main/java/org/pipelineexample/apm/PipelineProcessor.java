@@ -15,7 +15,7 @@ import java.util.regex.Pattern;
 public class PipelineProcessor {
 
     private static final String LOCALHOST = "127.0.0.1";
-    private static final Pattern TRANS_ID_PATTERN = Pattern.compile("PID:(.+);");
+    private static final Pattern KEY_VAL_PATTERN = Pattern.compile("//(.+):(.+)//;");
 
     private final String name;
     private final int inPort;
@@ -36,8 +36,8 @@ public class PipelineProcessor {
     }
 
     private String processMessage(String message) throws InterruptedException {
-        Transaction parentTransaction = getOrCreateTransaction(extractId(message));
-        Span span = parentTransaction.createSpan();
+        Transaction parentTransaction = getOrCreateTransaction(message);
+        Span span = parentTransaction.startSpan();
         try {
             span.setName(name);
             thisIsAcutallyABusinessLogic(message);
@@ -54,39 +54,38 @@ public class PipelineProcessor {
         }
     }
 
-    private String extractId(String message) {
-        Matcher matcher = TRANS_ID_PATTERN.matcher(message);
-        if (matcher.find()) {
-            return matcher.group(1);
-        }
-        return null;
-    }
-
     private void thisIsAcutallyABusinessLogic(String message) throws InterruptedException {
         info("processing message \"" + message + "\"");
         TimeUnit.SECONDS.sleep(3);
     }
 
-    private String injectParentTransactionId(String message, Transaction parentTransaction) {
-        Matcher matcher = TRANS_ID_PATTERN.matcher(message);
-        if (matcher.find()) {
-            return message;
+
+    private String extractKey(String key, String message) {
+        Matcher matcher = KEY_VAL_PATTERN.matcher(message);
+        while (matcher.find()) {
+            if (key.equals(matcher.group(1))) {
+                return matcher.group(2);
+            }
         }
-        String id = parentTransaction.getId();
-        if (id.isEmpty()) {
-            id = "111111111";
-        }
-        return message + " PID:" + id + ";";
+        return null;
     }
 
-    private Transaction getOrCreateTransaction(String transactionId) {
+
+    private String injectParentTransactionId(String message, Transaction parentTransaction) {
+        if (extractKey("elastic-apm-traceparent", message) == null) {
+            return message + " //elastic-apm-traceparent:" + parentTransaction.getTraceId() + "//;";
+        }
+        return message;
+    }
+
+    private Transaction getOrCreateTransaction(String message) {
         Transaction transaction;
         if ("Source".equals(name)) {
             transaction = ElasticApm.startTransaction();
         } else {
-            transaction = ElasticApm.startTransactionWithRemoteParent(key -> transactionId);
+            transaction = ElasticApm.startTransactionWithRemoteParent(key -> extractKey(key, message));
         }
-        transaction.setName("apmExamplePipeline");
+        transaction.setName("apmToyExampleParentTransaction");
         return transaction;
     }
 

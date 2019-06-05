@@ -1,7 +1,12 @@
 import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
 
-import static java.util.concurrent.TimeUnit.*
+import static java.util.concurrent.TimeUnit.NANOSECONDS
+
+buildscript {
+    ext {
+        apmVersion = '1.6.1'
+    }
+}
 
 plugins {
     id 'java'
@@ -17,7 +22,7 @@ repositories {
 }
 
 dependencies {
-    compile "co.elastic.apm:apm-agent-api:1.6.1"
+    compile "co.elastic.apm:apm-agent-api:${apmVersion}"
 
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }
@@ -36,16 +41,42 @@ jar {
 
 task runPipeline {
     doLast {
+        def elasticApm = new File("./elastic-apm-agent-${apmVersion}.jar");
+
+        if (!elasticApm.exists()) {
+            throw new GradleException("File not found /elastic-apm-agent${apmVersion}.jar")
+        }
+        exec {
+            commandLine 'jar', '-uf', jar.archivePath, elasticApm.getPath()
+        }
+        
+        def apmPropertiesFile = new File("apm.properties")
+        if (!apmPropertiesFile.exists()) {
+            throw new GradleException("apm.properties not found and cannot get console.")
+        }
+        
+        def apmProps = new Properties()
+        file("apm.properties").withInputStream { apmProps.load(it) }
+        apmProps.put("elastic.apm.application_packages", "org.pipelineexample.apm")
+        
+     
+        
         def props = new Properties()
         file("pipeline.properties").withInputStream { props.load(it) }
         def total = props.getProperty("total").toInteger()
 
         def taskExecutor = Executors.newFixedThreadPool(total)
+        
         1.upto(total, {
-            def num = it
+            def num = it            
             taskExecutor.execute({javaexec {
-                main="-jar"
-                args = [jar.archivePath, num]
+                main="-javaagent:./elastic-apm-agent-${apmVersion}.jar"
+                args = ["-Delastic.apm.service_name=${apmProps.getProperty("elastic.apm.service_name")}",
+                        "-Delastic.apm.server_urls=${apmProps.getProperty("elastic.apm.server_urls")}",
+                        "-Delastic.apm.secret_token=${apmProps.getProperty("elastic.apm.secret_token")}",
+                        "-Delastic.apm.application_packages=${apmProps.getProperty("elastic.apm.application_packages")}",
+                        "-jar",
+                        jar.archivePath, num]
                 }
             })
         })
