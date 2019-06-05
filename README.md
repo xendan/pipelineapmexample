@@ -60,3 +60,20 @@ private String processMessage(String message) throws InterruptedException {
             }
         }
 ``` 
+
+For current version of code actual result is: parent transaction is closed after 3 seconds, e.g. when `Source` completed
+"Business Logic"
+
+
+![But we actually have this](actual_result.png?raw=true "APM Kibana")
+
+It could be also OK for us not to have parent transaction, but have span following one after other, like
+
+![It would be nice to have something like this](apm-example2.png?raw=true "APM Kibana")
+
+
+but [open trace bridge documentation](https://www.elastic.co/guide/en/apm/agent/java/current/opentracing-bridge.html) says
+```
+Currently, this bridge only supports child_of references. Other references, like follows_from are not supported yet.
+``` 
+so not sure if it is possible.
