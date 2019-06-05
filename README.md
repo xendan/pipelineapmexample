@@ -1,6 +1,7 @@
 # pipelineapmexample
-Just toy example of pipeline, 
-Here is desirable result in APM Kibana
+Just a toy example of pipeline that consist of several java processes communicating by sockets.
+ 
+This is a desirable result in APM Kibana.
 
 ![It would be nice to have something like this](apm-example.png?raw=true "APM Kibana")
 
