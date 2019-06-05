@@ -26,6 +26,9 @@ public class ProcessorApplication {
     private static PipelineProcessor buildPipelineProcessor(String arg, Properties properties) {
         Integer currentNumber = Integer.valueOf(arg);
         Integer total = Integer.valueOf(properties.get("total").toString());
+        if (total < 3) {
+            throw new IllegalArgumentException("Expect number of processor >= 3");
+        }
         String name = getName(currentNumber, total);
         String[] ports =  properties.get("ports").toString().split(",");
         if (ports.length != total - 1) {

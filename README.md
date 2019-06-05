@@ -8,4 +8,5 @@ Example of pipeline that uses APM pefrormance metrics
 This will run "pipeline" defined by `pipeline.properties` where:
 
 `total` defines number of processor, expected >= 3
-`ports` ports used by processors for communication, expected list contains `total`-1 ports
+
+`ports` defines ports used by processors for communication, expected list of integers of `total`-1 length
