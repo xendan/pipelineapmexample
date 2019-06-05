@@ -3,7 +3,7 @@ Just a toy example of pipeline that consist of several java processes communicat
  
 This is a desirable result in APM Kibana.
 
-![It would be nice to have something like this](apm-example.png?raw=true "APM Kibana")
+![It would be nice to have something like this](apm-example.png?raw=true "APM Kibana: Expected")
 
 
 ## Quick start
@@ -19,10 +19,10 @@ This will run "pipeline" defined by `pipeline.properties` where:
 `ports` defines ports used by processors for communication, expected list of integers of `total`-1 length
 
 ## More details
-Gradle task `runPipeline` build project and run result jar `total` times, to create a pipeline that consist of `total` 
+Gradle task `runPipeline` builds project and runs result jar `total` times, to create a pipeline that consist of `total` 
 number of independent processors.
-Each processor except `Source` wait for message on incoming port, process it and write new message to outgoing port.
-Source does not read message, it just sent "First message" string.
+Each processor except `Source`(just fancy name for first processor) wait for message on incoming port, 
+process it and write new message to outgoing port. `Source` does not read message, it just sends "First message" string.
 
 ```
      +---------+         +----------+         +----------+           +----------+
@@ -39,7 +39,7 @@ Processor "Business logic" is executed in `PipelineProcessor.thisIsAcutallyABusi
         TimeUnit.SECONDS.sleep(3);
  }
 ```
-To wrap this logic with APM Transactions method  `PipelineProcessor.processMessage` is used
+`PipelineProcessor.processMessage` is used to wrap this logic with APM Transactions 
 
 ```java
 private String processMessage(String message) throws InterruptedException {
@@ -65,14 +65,14 @@ For current version of code actual result is: parent transaction is closed after
 "Business Logic"
 
 
-![But we actually have this](actual_result.png?raw=true "APM Kibana")
+![But we actually have this](actual_result.png?raw=true "APM Kibana: Actual")
 
-It could be also OK for us not to have parent transaction, but have span following one after other, like
+It could also be OK for us not to have parent transaction, but have span following one after other, like
 
-![It would be nice to have something like this](apm-example2.png?raw=true "APM Kibana")
+![It would be nice to have something like this](apm-example2.png?raw=true "APM Kibana: Other OK result")
 
 
-but [open trace bridge documentation](https://www.elastic.co/guide/en/apm/agent/java/current/opentracing-bridge.html) says
+but [APM open trace bridge documentation](https://www.elastic.co/guide/en/apm/agent/java/current/opentracing-bridge.html) says
 ```
 Currently, this bridge only supports child_of references. Other references, 
 like follows_from are not supported yet.
