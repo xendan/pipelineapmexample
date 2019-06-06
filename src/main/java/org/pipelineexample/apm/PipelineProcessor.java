@@ -57,7 +57,7 @@ public class PipelineProcessor {
         try {
             span.setName(name);
             thisIsAcutallyABusinessLogic(message);
-            return  injectParentTransactionId(message, parentTransaction) + ", processed by " + name;
+            return injectParentTransactionId(message, parentTransaction) + ", processed by " + name;
         } catch (Exception e) {
             parentTransaction.captureException(e);
             span.captureException(e);
