@@ -7,16 +7,17 @@ This is a desirable result in APM Kibana.
 
 
 ## Quick start
-Create file 'apm.properties' using your APM server properties, content should be similar to `apm.example.properties` file.
+Create `apm.properties` file using your APM server properties, content should be similar to `apm.example.properties` file.
 Run
 ```
 ./gradlew clean runPipeline
 ```
 
 ## More details
-Gradle task `runPipeline` builds project and runs result jar several times, to create a pipeline that consist of several
-java processes. Number of processes and ports that they use for sending/receiving message is defined in `pipeline.properties`
-Each processor except `Source`(just fancy name for first processor) wait for message on incoming port, 
+Gradle task `runPipeline` builds project and execute result `jar` file several times, to create a pipeline that consist of several
+java processes(one for each [processor](src/main/java/org/pipelineexample/apm/PipelineProcessor.java). 
+Number of processors and ports that they use for sending/receiving messages is defined in `pipeline.properties`
+Each [processor](src/main/java/org/pipelineexample/apm/PipelineProcessor.java) except `Source`(just fancy name for the first [processor](src/main/java/org/pipelineexample/apm/PipelineProcessor.java)) waits for message on incoming port, 
 process it and write new message to outgoing port. `Source` does not read message, it just sends "First message" string.
 
 ```
