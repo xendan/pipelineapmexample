@@ -52,18 +52,17 @@ task runPipeline {
         
         def apmPropertiesFile = new File("apm.properties")
         if (!apmPropertiesFile.exists()) {
-            throw new GradleException("apm.properties not found and cannot get console.")
+            throw new GradleException("apm.properties not found. Create it from `apm.example.propeties`")
         }
         
         def apmProps = new Properties()
         file("apm.properties").withInputStream { apmProps.load(it) }
         apmProps.put("elastic.apm.application_packages", "org.pipelineexample.apm")
         
-     
-        
+             
         def props = new Properties()
         file("pipeline.properties").withInputStream { props.load(it) }
-        def total = props.getProperty("total").toInteger()
+        def total = props.getProperty("ports").split(",").length + 1;
 
         def taskExecutor = Executors.newFixedThreadPool(total)
         

@@ -25,12 +25,16 @@ public class ProcessorApplication {
 
     private static PipelineProcessor buildPipelineProcessor(String arg, Properties properties) {
         Integer currentNumber = Integer.valueOf(arg);
-        Integer total = Integer.valueOf(properties.get("total").toString());
-        if (total < 3) {
-            throw new IllegalArgumentException("Expect number of processor >= 3");
+        String portsStr = properties.getProperty("ports");
+        if (portsStr == null) {
+            throw new IllegalArgumentException("Property `ports` not found in " + PROPERTIES_FILE_PATH);
+        }
+        String[] ports =  portsStr.split(",");
+        Integer total = ports.length + 1;
+        if (ports.length <= 2) {
+            throw new IllegalArgumentException("Expect number of ports more 2");
         }
         String name = getName(currentNumber, total);
-        String[] ports =  properties.get("ports").toString().split(",");
         if (ports.length != total - 1) {
             throw new IllegalArgumentException("Expect number of ports is total - 1");
         }

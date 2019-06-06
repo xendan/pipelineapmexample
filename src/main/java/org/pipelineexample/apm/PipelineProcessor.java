@@ -15,7 +15,7 @@ import java.util.regex.Pattern;
 public class PipelineProcessor {
 
     private static final String LOCALHOST = "127.0.0.1";
-    private static final Pattern KEY_VAL_PATTERN = Pattern.compile("//(.+):(.+)//;");
+    private static final Pattern KEY_VAL_PATTERN = Pattern.compile("<<<(.+):(.+)>>>");
 
     private final String name;
     private final int inPort;
@@ -73,7 +73,7 @@ public class PipelineProcessor {
 
     private String injectParentTransactionId(String message, Transaction parentTransaction) {
         if (extractKey("elastic-apm-traceparent", message) == null) {
-            return message + " //elastic-apm-traceparent:" + parentTransaction.getTraceId() + "//;";
+            return message + " <<<elastic-apm-traceparent:" + parentTransaction.getTraceId() + ">>>";
         }
         return message;
     }

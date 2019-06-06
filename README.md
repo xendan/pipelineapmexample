@@ -12,15 +12,10 @@ Run
 ```
 ./gradlew clean runPipeline
 ```
-This will run "pipeline" defined by `pipeline.properties` where:
-
-`total` defines number of processors, expected >= 3
-
-`ports` defines ports used by processors for communication, expected list of integers of `total`-1 length
 
 ## More details
-Gradle task `runPipeline` builds project and runs result jar `total` times, to create a pipeline that consist of `total` 
-number of independent processors.
+Gradle task `runPipeline` builds project and runs result jar several times, to create a pipeline that consist of several
+java processes. Number of processes and ports that they use for sending/receiving message is defined in `pipeline.properties`
 Each processor except `Source`(just fancy name for first processor) wait for message on incoming port, 
 process it and write new message to outgoing port. `Source` does not read message, it just sends "First message" string.
 
