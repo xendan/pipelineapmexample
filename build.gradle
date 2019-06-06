@@ -63,6 +63,7 @@ task runPipeline {
         def props = new Properties()
         file("pipeline.properties").withInputStream { props.load(it) }
         def portsStr = props.getProperty("ports")
+        def burnCpus = props.getProperty("burnCpus");
         def total = portsStr.split(",").length + 1;
 
         def taskExecutor = Executors.newFixedThreadPool(total)
@@ -75,7 +76,7 @@ task runPipeline {
                         "-Delastic.apm.secret_token=${apmProps.getProperty("elastic.apm.secret_token")}",
                         "-Delastic.apm.application_packages=${apmProps.getProperty("elastic.apm.application_packages")}",
                         "-jar",
-                        jar.archivePath, num, portsStr]
+                        jar.archivePath, num, portsStr, burnCpus]
                 }
             })
         })

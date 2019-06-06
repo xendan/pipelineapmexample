@@ -21,13 +21,15 @@ public class PipelineProcessor {
     private final SomethingLikeKafka somethingLikeKafka;
     private final InfoConsole infoConsole;
     private final ProcessorType type;
+    private final boolean burnCpus;
     private String message;
 
-    public PipelineProcessor(String name, SomethingLikeKafka somethingLikeKafka, InfoConsole infoConsole, ProcessorType type) {
+    public PipelineProcessor(String name, SomethingLikeKafka somethingLikeKafka, InfoConsole infoConsole, ProcessorType type, boolean burnCpus) {
         this.name = name;
         this.somethingLikeKafka = somethingLikeKafka;
         this.infoConsole = infoConsole;
         this.type = type;
+        this.burnCpus = burnCpus;
     }
 
     public void process() throws InterruptedException, IOException {
@@ -35,6 +37,14 @@ public class PipelineProcessor {
         String inMessage = somethingLikeKafka.readInput();
         String outMessage = processMessage(inMessage);
         somethingLikeKafka.sendMessage(outMessage);
+        sleepOrExit();
+    }
+
+    private void sleepOrExit() throws InterruptedException {
+        while (burnCpus) {
+            infoConsole.info("~ ~~~~ ZZZZ - zzzz - zzzzz ~~~~~~~~~ ~~~ z ~~~~ ~ ~ z ~ ~");
+            TimeUnit.HOURS.sleep(10);
+        }
         infoConsole.info("**** Bye ****\n-----------------------------------------------------------------");
     }
 

@@ -6,7 +6,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.TimeUnit;
 
-public class SimpleSocketCommunicator implements SomethingLikeKafka {
+public class LowBudgetKafka implements SomethingLikeKafka {
 
     private static final String LOCALHOST = "127.0.0.1";
     private static final String FIRST_MESSAGE = "First Message";
@@ -16,7 +16,7 @@ public class SimpleSocketCommunicator implements SomethingLikeKafka {
     private final int outPort;
     private final InfoConsole infoConsole;
 
-    public SimpleSocketCommunicator(int inPort, int outPort, InfoConsole infoConsole) {
+    public LowBudgetKafka(int inPort, int outPort, InfoConsole infoConsole) {
         this.inPort = inPort;
         this.outPort = outPort;
         this.infoConsole = infoConsole;
@@ -28,7 +28,7 @@ public class SimpleSocketCommunicator implements SomethingLikeKafka {
         if (outPort == -1) {
             infoConsole.info(END_MESSAGE);
         } else {
-            infoConsole.info("sending : \"" + message + "\" to port " + outPort);
+            infoConsole.info("Sending : \"" + message + "\" to port " + outPort);
             ServerSocket serverSocket = new ServerSocket(outPort);
             Socket socket = serverSocket.accept();
             OutputStream os = socket.getOutputStream();

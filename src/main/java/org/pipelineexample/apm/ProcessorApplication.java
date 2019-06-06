@@ -8,11 +8,11 @@ import java.io.IOException;
 public class ProcessorApplication {
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        if (args.length != 2) {
+        if (args.length < 2) {
             throw new IllegalArgumentException("Expect 2 arguments: number of processor and comma separated list of ports");
         }
-
-        PipelineProcessor pipelineProcessor = new PipelineProcessorFactory(args[1]).buildPipelineProcessor(args[0]);
+        boolean burnCpus = args.length > 2 && Boolean.valueOf(args[2]);
+        PipelineProcessor pipelineProcessor = new PipelineProcessorFactory(args[1]).buildPipelineProcessor(args[0], burnCpus);
         pipelineProcessor.process();
     }
 

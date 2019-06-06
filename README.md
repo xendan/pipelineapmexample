@@ -77,3 +77,7 @@ Currently, this bridge only supports child_of references. Other references,
 like follows_from are not supported yet.
 ``` 
 so not sure if it is possible.
+
+##P.S.
+Our real processors are listeners, so they do listen Kafka in a never ending loop. If this is the reason, this processor
+also can run in a loop mode, by setting `burnCpus` property to `true` in [pipeline.properties](pipeline.properties). 
