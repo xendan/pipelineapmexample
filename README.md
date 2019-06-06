@@ -39,19 +39,19 @@ Processor "Business logic" is executed in `PipelineProcessor.thisIsAcutallyABusi
 
 ```java
 private String processMessage(String message) throws InterruptedException {
-        Transaction parentTransaction = getOrCreateTransaction(message);
+Transaction parentTransaction = getOrCreateTransaction(message);
         Span span = parentTransaction.startSpan();
         try {
             span.setName(name);
             thisIsAcutallyABusinessLogic(message);
-            return injectParentTransactionId(message, parentTransaction) + ", processed by " + name;
+            return  injectParentTransactionId(message, parentTransaction) + ", processed by " + name;
         } catch (Exception e) {
             parentTransaction.captureException(e);
             span.captureException(e);
             throw e;
         } finally {
             span.end();
-            if ("Sink".equals(name)) {
+            if (isSink()) {
                 parentTransaction.end();
             }
         }
