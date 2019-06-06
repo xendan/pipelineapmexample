@@ -64,11 +64,7 @@ For current version of code actual result is: parent transaction is closed after
 
 
 ![But we actually have this](actual_result.png?raw=true "APM Kibana: Actual")
-And also there is a warning message:
-```
-WARN co.elastic.apm.agent.impl.transaction.TraceContext - The traceparent header has to be at least 55 chars long, but was 'a87a7067a273501c374e16f3ab9cca69'
 
-```
 
 It could also be OK for us not to have parent transaction, but have span following one after another, like
 

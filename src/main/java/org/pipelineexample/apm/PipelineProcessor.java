@@ -14,7 +14,7 @@ import java.util.regex.Pattern;
  */
 public class PipelineProcessor {
 
-    private static final String PARENT_TRANSACTION_NAME = "apmToyExampleParentTransaction";
+    private static final String PARENT_TRANSACTION_NAME = "apmToyExampleParentTransactionWithRightInjection";
     private static final Pattern KEY_VAL_PATTERN = Pattern.compile("<<<(.+):(.+)>>>");
 
     private final String name;
