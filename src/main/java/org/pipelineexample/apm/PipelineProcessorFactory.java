@@ -30,8 +30,8 @@ public class PipelineProcessorFactory {
         int inPort = getPort(currentNumber, true);
         int outPort = getPort(currentNumber, false);
         InfoConsole infoConsole = new InfoConsole(name);
-        SomethingLikeKafka somethingLikeKafka = new LowBudgetKafka(inPort, outPort, infoConsole);
-        return new PipelineProcessor(name, somethingLikeKafka, infoConsole, type, burnCpus);
+        LowBudgetKafka kafka = new LowBudgetKafka(inPort, outPort, infoConsole);
+        return new PipelineProcessor(name, kafka, infoConsole, type, burnCpus);
     }
 
     private int getPort(Integer currentNumber, boolean isIn) {

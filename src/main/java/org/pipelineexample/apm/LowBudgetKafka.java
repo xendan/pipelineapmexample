@@ -6,7 +6,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.TimeUnit;
 
-public class LowBudgetKafka implements SomethingLikeKafka {
+public class LowBudgetKafka {
 
     private static final String LOCALHOST = "127.0.0.1";
     private static final String FIRST_MESSAGE = "First Message";
@@ -23,7 +23,6 @@ public class LowBudgetKafka implements SomethingLikeKafka {
     }
 
 
-    @Override
     public void sendMessage(String message) throws IOException {
         if (outPort == -1) {
             infoConsole.info(END_MESSAGE);
@@ -39,8 +38,7 @@ public class LowBudgetKafka implements SomethingLikeKafka {
         }
     }
 
-    @Override
-    public String readInput() throws IOException, InterruptedException {
+    public String readMessage() throws IOException, InterruptedException {
         if (inPort == -1) {
             return FIRST_MESSAGE;
         }

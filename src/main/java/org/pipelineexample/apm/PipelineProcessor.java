@@ -9,24 +9,22 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * Reads message on inPort, process it and send it to outPort.
- */
+
 public class PipelineProcessor {
 
-    private static final String PARENT_TRANSACTION_NAME = "apmToyExampleParentTransactionWithRightInjection";
+    private static final String PARENT_TRANSACTION_NAME = "apmToyExampleParentTransaction";
     private static final Pattern KEY_VAL_PATTERN = Pattern.compile("<<<(.+):(.+)>>>");
 
     private final String name;
-    private final SomethingLikeKafka somethingLikeKafka;
+    private final LowBudgetKafka communicationChannel;
     private final InfoConsole infoConsole;
     private final ProcessorType type;
     private final boolean burnCpus;
     private String message;
 
-    public PipelineProcessor(String name, SomethingLikeKafka somethingLikeKafka, InfoConsole infoConsole, ProcessorType type, boolean burnCpus) {
+    public PipelineProcessor(String name, LowBudgetKafka communicationChannel, InfoConsole infoConsole, ProcessorType type, boolean burnCpus) {
         this.name = name;
-        this.somethingLikeKafka = somethingLikeKafka;
+        this.communicationChannel = communicationChannel;
         this.infoConsole = infoConsole;
         this.type = type;
         this.burnCpus = burnCpus;
@@ -34,9 +32,9 @@ public class PipelineProcessor {
 
     public void process() throws InterruptedException, IOException {
         infoConsole.info( "**** Started ****");
-        String inMessage = somethingLikeKafka.readInput();
+        String inMessage = communicationChannel.readMessage();
         String outMessage = processMessage(inMessage);
-        somethingLikeKafka.sendMessage(outMessage);
+        communicationChannel.sendMessage(outMessage);
         sleepOrExit();
     }
 
