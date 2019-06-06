@@ -27,7 +27,7 @@ process it and write new message to outgoing port. `Source` does not read messag
      +---------+         +----------+         +----------+           +----------+
 ```
 
-Processor "Business logic" is executed in `PipelineProcessor.thisIsAcutallyABusinessLogic`
+Processor "Business logic" is executed in [`PipelineProcessor.thisIsAcutallyABusinessLogic`](src/main/java/org/pipelineexample/apm/PipelineProcessor.java)
 
 ```java
  private void thisIsAcutallyABusinessLogic(String message) throws InterruptedException {
@@ -35,7 +35,7 @@ Processor "Business logic" is executed in `PipelineProcessor.thisIsAcutallyABusi
         TimeUnit.SECONDS.sleep(3);
  }
 ```
-`PipelineProcessor.processMessage` is used to wrap this logic with APM Transactions 
+[`PipelineProcessor.processMessage`](src/main/java/org/pipelineexample/apm/PipelineProcessor.java) is used to wrap this logic with APM Transactions 
 
 ```java
 private String processMessage(String message) throws InterruptedException {
