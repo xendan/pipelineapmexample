@@ -14,9 +14,9 @@ Run
 ```
 
 ## More details
-Gradle task `runPipeline` builds project and execute result `jar` file several times, to create a pipeline that consist of several
+Gradle task `runPipeline` builds project and execute result jar file several times, to create a pipeline that consist of several
 java processes (one for each [processor](src/main/java/org/pipelineexample/apm/PipelineProcessor.java)). 
-Number of processors and ports that they use for sending/receiving messages is defined in `pipeline.properties`
+Number of processors and ports that they use for sending/receiving messages is defined in [pipeline.properties](pipeline.properties) 
 Each [processor](src/main/java/org/pipelineexample/apm/PipelineProcessor.java) except `Source`(just a fancy name for the first [processor](src/main/java/org/pipelineexample/apm/PipelineProcessor.java), last is `Sink`) waits for message on incoming port, 
 process it and write new message to outgoing port. `Source` does not read message, it just sends "First message" string.
 
