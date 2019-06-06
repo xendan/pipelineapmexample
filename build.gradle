@@ -62,10 +62,10 @@ task runPipeline {
              
         def props = new Properties()
         file("pipeline.properties").withInputStream { props.load(it) }
-        def total = props.getProperty("ports").split(",").length + 1;
+        def portsStr = props.getProperty("ports")
+        def total = portsStr.split(",").length + 1;
 
         def taskExecutor = Executors.newFixedThreadPool(total)
-        
         1.upto(total, {
             def num = it            
             taskExecutor.execute({javaexec {
@@ -75,7 +75,7 @@ task runPipeline {
                         "-Delastic.apm.secret_token=${apmProps.getProperty("elastic.apm.secret_token")}",
                         "-Delastic.apm.application_packages=${apmProps.getProperty("elastic.apm.application_packages")}",
                         "-jar",
-                        jar.archivePath, num]
+                        jar.archivePath, num, portsStr]
                 }
             })
         })

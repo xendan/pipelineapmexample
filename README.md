@@ -30,8 +30,7 @@ process it and write new message to outgoing port. `Source` does not read messag
 Processor "Business logic" is executed in [`PipelineProcessor.thisIsAcutallyABusinessLogic`](src/main/java/org/pipelineexample/apm/PipelineProcessor.java)
 
 ```java
- private void thisIsAcutallyABusinessLogic(String message) throws InterruptedException {
-        info("processing message \"" + message + "\"");
+ private void thisIsAcutallyABusinessLogic() throws InterruptedException {
         TimeUnit.SECONDS.sleep(3);
  }
 ```
@@ -43,7 +42,7 @@ Transaction parentTransaction = getOrCreateTransaction(message);
         Span span = parentTransaction.startSpan();
         try {
             span.setName(name);
-            thisIsAcutallyABusinessLogic(message);
+            thisIsActuallyABusinessLogic(message);
             return injectParentTransactionId(message, parentTransaction) + ", processed by " + name;
         } catch (Exception e) {
             parentTransaction.captureException(e);
