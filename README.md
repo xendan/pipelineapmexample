@@ -14,7 +14,7 @@ Run
 ```
 This will run "pipeline" defined by `pipeline.properties` where:
 
-`total` defines number of processor, expected >= 3
+`total` defines number of processors, expected >= 3
 
 `ports` defines ports used by processors for communication, expected list of integers of `total`-1 length
 
@@ -48,7 +48,7 @@ private String processMessage(String message) throws InterruptedException {
         try {
             span.setName(name);
             thisIsAcutallyABusinessLogic(message);
-            return  injectParentTransactionId(message, parentTransaction) + ", processed by " + name;
+            return injectParentTransactionId(message, parentTransaction) + ", processed by " + name;
         } catch (Exception e) {
             parentTransaction.captureException(e);
             span.captureException(e);
@@ -67,7 +67,7 @@ For current version of code actual result is: parent transaction is closed after
 
 ![But we actually have this](actual_result.png?raw=true "APM Kibana: Actual")
 
-It could also be OK for us not to have parent transaction, but have span following one after other, like
+It could also be OK for us not to have parent transaction, but have span following one after another, like
 
 ![It would be nice to have something like this](apm-example2.png?raw=true "APM Kibana: Other OK result")
 
