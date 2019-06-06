@@ -3,7 +3,7 @@ Just a toy example of pipeline that consist of several java processes communicat
  
 This is a desirable result in APM Kibana.
 
-![It would be nice to have something like this](apm-example.png?raw=true "APM Kibana: Expected")
+![It would be nice to have something like this](imgs/apm-example.png?raw=true "APM Kibana: Expected")
 
 
 ## Quick start
@@ -63,12 +63,12 @@ For current version of code actual result is: parent transaction is closed after
 "Business Logic"
 
 
-![But we actually have this](actual_result.png?raw=true "APM Kibana: Actual")
+![But we actually have this](imgs/actual_result.png?raw=true "APM Kibana: Actual")
 
 
 It could also be OK for us not to have parent transaction, but have span following one after another, like
 
-![It would be nice to have something like this](apm-example2.png?raw=true "APM Kibana: Other OK result")
+![It would be nice to have something like this](imgs/apm-example2.png?raw=true "APM Kibana: Other OK result")
 
 
 but [APM open trace bridge documentation](https://www.elastic.co/guide/en/apm/agent/java/current/opentracing-bridge.html) says
