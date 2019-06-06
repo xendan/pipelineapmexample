@@ -21,6 +21,7 @@ public class PipelineProcessor {
     private final SomethingLikeKafka somethingLikeKafka;
     private final InfoConsole infoConsole;
     private final ProcessorType type;
+    private String message;
 
     public PipelineProcessor(String name, SomethingLikeKafka somethingLikeKafka, InfoConsole infoConsole, ProcessorType type) {
         this.name = name;
@@ -41,12 +42,14 @@ public class PipelineProcessor {
      * Wraps APM Transaction/Span around business logic.
      */
     private String processMessage(String message) throws InterruptedException {
+        this.message = message;
         Transaction parentTransaction = getOrCreateTransaction(message);
         Span span = parentTransaction.startSpan();
         try {
             span.setName(name);
             thisIsActuallyABusinessLogic();
-            return injectParentTransactionId(message, parentTransaction) + ", processed by " + name;
+            parentTransaction.injectTraceHeaders(this::injectParentTransactionId);
+            return this.message + " processed by " + name;
         } catch (Exception e) {
             parentTransaction.captureException(e);
             span.captureException(e);
@@ -66,6 +69,11 @@ public class PipelineProcessor {
         TimeUnit.SECONDS.sleep(3);
     }
 
+    private void injectParentTransactionId(String key, String value) {
+        if (extractKey(key, message) == null) {
+            message += ("<<<"+ key +":" +value + ">>>");
+        }
+    }
 
     private String extractKey(String key, String message) {
         Matcher matcher = KEY_VAL_PATTERN.matcher(message);
@@ -75,13 +83,6 @@ public class PipelineProcessor {
             }
         }
         return null;
-    }
-
-    private String injectParentTransactionId(String message, Transaction parentTransaction) {
-        if (extractKey("elastic-apm-traceparent", message) == null) {
-            return message + " <<<elastic-apm-traceparent:" + parentTransaction.getTraceId() + ">>>";
-        }
-        return message;
     }
 
     private Transaction getOrCreateTransaction(String message) {

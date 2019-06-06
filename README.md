@@ -38,22 +38,24 @@ Processor "Business logic" is executed in [`PipelineProcessor.thisIsActuallyABus
 
 ```java
     private String processMessage(String message) throws InterruptedException {
-        Transaction parentTransaction = getOrCreateTransaction(message);
-        Span span = parentTransaction.startSpan();
-        try {
-            span.setName(name);
-            thisIsActuallyABusinessLogic(message);
-            return injectParentTransactionId(message, parentTransaction) + ", processed by " + name;
-        } catch (Exception e) {
-            parentTransaction.captureException(e);
-            span.captureException(e);
-            throw e;
-        } finally {
-            span.end();
-            if (isSink()) {
-                parentTransaction.end();
-            }
-        }
+         this.message = message;
+         Transaction parentTransaction = getOrCreateTransaction(message);
+         Span span = parentTransaction.startSpan();
+         try {
+             span.setName(name);
+             thisIsActuallyABusinessLogic();
+             parentTransaction.injectTraceHeaders(this::injectParentTransactionId);
+             return this.message + " processed by " + name;
+         } catch (Exception e) {
+             parentTransaction.captureException(e);
+             span.captureException(e);
+             throw e;
+         } finally {
+             span.end();
+             if (type == ProcessorType.SINK) {
+                 parentTransaction.end();
+             }
+         }
     }
 ``` 
 
