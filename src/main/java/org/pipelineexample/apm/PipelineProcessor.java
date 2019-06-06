@@ -12,21 +12,34 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Reads message on inPort, process it and send it to outPort.
+ */
 public class PipelineProcessor {
 
     private static final String LOCALHOST = "127.0.0.1";
     private static final Pattern KEY_VAL_PATTERN = Pattern.compile("<<<(.+):(.+)>>>");
+    private static final String FIRST_MESSAGE = "First Message";
+    private static final String END_MESSAGE = "Pipeline ended!";
 
     private final String name;
     private final int inPort;
     private final int outPort;
 
+    /**
+     * @param name - "Source" for first in pipeline, "Sink" for last and "Processor_<number>" for <number> process.
+     * @param inPort - port to read message, if -1, than message is just hardcoded string FIRST_MESSAGE
+     * @param outPort - port to write processed message. If -1, "Sink" do not send message, just print #END_MESSAGE
+     */
     public PipelineProcessor(String name, int inPort, int outPort) {
         this.name = name;
         this.inPort = inPort;
         this.outPort = outPort;
     }
 
+    /**
+     * Wait for message on incoming inPort, process it and write to outPort.
+     */
     public void process() throws InterruptedException, IOException {
         info("started");
         String inMessage = readInput();
@@ -35,6 +48,9 @@ public class PipelineProcessor {
         info("Bye");
     }
 
+    /**
+     * Wraps APM Transaction/Span around business logic.
+     */
     private String processMessage(String message) throws InterruptedException {
         Transaction parentTransaction = getOrCreateTransaction(message);
         Span span = parentTransaction.startSpan();
@@ -54,6 +70,9 @@ public class PipelineProcessor {
         }
     }
 
+    /**
+     * Some useful work.
+     */
     private void thisIsAcutallyABusinessLogic(String message) throws InterruptedException {
         info("processing message \"" + message + "\"");
         TimeUnit.SECONDS.sleep(3);
@@ -91,7 +110,7 @@ public class PipelineProcessor {
 
     private void sendMessage(String message) throws IOException {
         if (outPort == -1) {
-            info("Pipeline ended!");
+            info(END_MESSAGE);
         } else {
             info("sending : \"" + message + "\" to port " + outPort);
             ServerSocket serverSocket = new ServerSocket(outPort);
@@ -106,7 +125,7 @@ public class PipelineProcessor {
 
     private String readInput() throws IOException, InterruptedException {
         if (inPort == -1) {
-            return "First Message";
+            return FIRST_MESSAGE;
         }
         return readFromSocket();
     }
