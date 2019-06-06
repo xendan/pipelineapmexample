@@ -21,9 +21,8 @@ repositories {
     mavenCentral()
 }
 
-dependencies {
+dependencies {    
     compile "co.elastic.apm:apm-agent-api:${apmVersion}"
-
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }
 
@@ -39,7 +38,7 @@ jar {
     }
 }
 
-task runPipeline {
+task gitAddApmJar {
     doLast {
         def elasticApm = new File("./elastic-apm-agent-${apmVersion}.jar");
 
@@ -47,9 +46,14 @@ task runPipeline {
             throw new GradleException("File not found /elastic-apm-agent${apmVersion}.jar")
         }
         exec {
-            commandLine 'jar', '-uf', jar.archivePath, elasticApm.getPath()
+            commandLine 'jar', '-uf', jar.archivePath, "./elastic-apm-agent-${apmVersion}.jar"
         }
-        
+    }
+}
+
+
+task runPipeline {
+    doLast {
         def apmPropertiesFile = new File("apm.properties")
         if (!apmPropertiesFile.exists()) {
             throw new GradleException("apm.properties not found. Create it from `apm.example.propeties`")
@@ -91,3 +95,4 @@ task runPipeline {
 }
 
 runPipeline.dependsOn.add("jar")
+build.finalizedBy gitAddApmJar

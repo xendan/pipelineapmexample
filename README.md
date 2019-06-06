@@ -10,7 +10,7 @@ This is a desirable result in APM Kibana.
 Create `apm.properties` file using your APM server properties, content should be similar to [apm.example.properties](apm.example.properties) file.
 Run
 ```
-./gradlew clean runPipeline
+./gradlew runPipeline
 ```
 
 ## More details
