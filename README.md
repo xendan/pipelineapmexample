@@ -27,18 +27,18 @@ process it and write new message to outgoing port. `Source` does not read messag
      +---------+         +----------+         +----------+           +----------+
 ```
 
-Processor "Business logic" is executed in [`PipelineProcessor.thisIsAcutallyABusinessLogic`](src/main/java/org/pipelineexample/apm/PipelineProcessor.java)
+Processor "Business logic" is executed in [`PipelineProcessor.thisIsActuallyABusinessLogic`](src/main/java/org/pipelineexample/apm/PipelineProcessor.java)
 
 ```java
- private void thisIsAcutallyABusinessLogic() throws InterruptedException {
+    private void thisIsActuallyABusinessLogic() throws InterruptedException {
         TimeUnit.SECONDS.sleep(3);
- }
+    }
 ```
 [`PipelineProcessor.processMessage`](src/main/java/org/pipelineexample/apm/PipelineProcessor.java) is used to wrap this logic with APM Transactions 
 
 ```java
-private String processMessage(String message) throws InterruptedException {
-Transaction parentTransaction = getOrCreateTransaction(message);
+    private String processMessage(String message) throws InterruptedException {
+        Transaction parentTransaction = getOrCreateTransaction(message);
         Span span = parentTransaction.startSpan();
         try {
             span.setName(name);
@@ -54,6 +54,7 @@ Transaction parentTransaction = getOrCreateTransaction(message);
                 parentTransaction.end();
             }
         }
+    }
 ``` 
 
 For current version of code actual result is: parent transaction is closed after 3 seconds, e.g. when `Source` completed
