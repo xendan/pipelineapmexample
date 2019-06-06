@@ -27,7 +27,7 @@ public class PipelineProcessor {
     private final int outPort;
 
     /**
-     * @param name - "Source" for first in pipeline, "Sink" for last and "Processor_<number>" for <number> process.
+     * @param name - "Source" for first in pipeline, "Sink" for last and "Processor_<number>" for <number> processor.
      * @param inPort - port to read message, if -1, than message is just hardcoded string FIRST_MESSAGE
      * @param outPort - port to write processed message. If -1, "Sink" do not send message, just print #END_MESSAGE
      */
@@ -64,10 +64,18 @@ public class PipelineProcessor {
             throw e;
         } finally {
             span.end();
-            if ("Sink".equals(name)) {
+            if (isSink()) {
                 parentTransaction.end();
             }
         }
+    }
+
+    private boolean isSink() {
+        return -1 == outPort;
+    }
+
+    private boolean isSource() {
+        return -1 == inPort;
     }
 
     /**
@@ -99,7 +107,7 @@ public class PipelineProcessor {
 
     private Transaction getOrCreateTransaction(String message) {
         Transaction transaction;
-        if ("Source".equals(name)) {
+        if (isSource()) {
             transaction = ElasticApm.startTransaction();
         } else {
             transaction = ElasticApm.startTransactionWithRemoteParent(key -> extractKey(key, message));
@@ -107,6 +115,8 @@ public class PipelineProcessor {
         transaction.setName("apmToyExampleParentTransaction");
         return transaction;
     }
+
+
 
     private void sendMessage(String message) throws IOException {
         if (outPort == -1) {
