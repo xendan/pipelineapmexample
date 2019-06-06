@@ -37,25 +37,24 @@ public class ProcessorApplication {
             throw new IllegalArgumentException("Property `ports` not found in " + PROPERTIES_FILE_PATH);
         }
         String[] ports =  portsStr.split(",");
-        Integer total = ports.length + 1;
-        if (ports.length <= 2) {
+        Integer total = ports.length;
+        if (ports.length <= 3) {
             throw new IllegalArgumentException("Expect number of ports more 2");
         }
         String name = getName(currentNumber, total);
-        if (ports.length != total - 1) {
-            throw new IllegalArgumentException("Expect number of ports is total - 1");
-        }
-        int inPort = getPort(currentNumber, total, ports, true);
-        int outPort = getPort(currentNumber, total, ports, false);
+        boolean isLast = total.equals(currentNumber);
+        System.out.println("Total = " + total + ", currentNumber=" + currentNumber + ", ISLASt" + isLast);
+        int inPort = getPort(currentNumber, ports, isLast, true);
+        int outPort = getPort(currentNumber, ports, isLast, false);
 
         return new PipelineProcessor(name, inPort, outPort);
     }
 
-    private static int getPort(Integer currentNumber, Integer total, String[] ports, boolean isIn) {
-        if ((currentNumber == 1 && isIn) || (currentNumber.equals(total) && !isIn)) {
+    private static int getPort(Integer currentNumber, String[] ports, boolean isLast, boolean isInPort) {
+        if (isLast && !isInPort) {
             return -1;
         }
-        int index = isIn ? currentNumber - 2 : currentNumber - 1;
+        int index = isInPort ? currentNumber - 1 : currentNumber;
         return Integer.valueOf(ports[index]);
     }
 

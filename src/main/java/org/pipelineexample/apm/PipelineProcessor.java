@@ -75,7 +75,8 @@ public class PipelineProcessor {
     }
 
     private boolean isSource() {
-        return -1 == inPort;
+        //return -1 == inPort;
+        return "Source".equals(name);
     }
 
     /**
@@ -141,6 +142,7 @@ public class PipelineProcessor {
     }
 
     private String readFromSocket() throws IOException, InterruptedException {
+        info("listening to : " + inPort);
         while (true) {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             try ( Socket client = new Socket(LOCALHOST, inPort);

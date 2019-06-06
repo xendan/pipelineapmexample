@@ -62,12 +62,12 @@ task runPipeline {
              
         def props = new Properties()
         file("pipeline.properties").withInputStream { props.load(it) }
-        def total = props.getProperty("ports").split(",").length + 1;
+        def total = props.getProperty("ports").split(",").length
 
         def taskExecutor = Executors.newFixedThreadPool(total)
         
         1.upto(total, {
-            def num = it            
+            def num = it 
             taskExecutor.execute({javaexec {
                 main="-javaagent:./elastic-apm-agent-${apmVersion}.jar"
                 args = ["-Delastic.apm.service_name=${apmProps.getProperty("elastic.apm.service_name")}",
