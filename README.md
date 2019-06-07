@@ -100,9 +100,10 @@ Processor "Business logic" is executed in [`PipelineProcessor.thisIsActuallyABus
 
 ``` 
 
-For current version of code actual result is: parent transaction duration is 3 seconds, time of Business Logic of 1 processor
-and only last child `Sink` is present.
-
+For current version of code actual result is:
+ - only one transaction is created
+ - duration of this transaction is only 3 seconds, e.g. execution time of single processor
+ - parent transaction contains only one span for `Sink`
 
 ![But we actually have this](imgs/actual_result.png?raw=true "APM Kibana: Actual")
 
