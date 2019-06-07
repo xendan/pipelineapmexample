@@ -1,6 +1,6 @@
 # Pipeline APM example
 Just a toy example of pipeline that consist of several java processes communicating by sockets.
- 
+## Expected result
 This is a desirable result in APM Kibana, created with GIMP.
 
 ![It would be nice to have something like this](imgs/apm-example.png?raw=true "APM Kibana: Expected with parent")
@@ -99,7 +99,7 @@ Processor "Business logic" is executed in [`PipelineProcessor.thisIsActuallyABus
     }
 
 ``` 
-
+## Actual result
 For current version of code actual result is:
  - only one transaction is created
  - duration of this transaction is only 3 seconds, e.g. execution time of single processor
