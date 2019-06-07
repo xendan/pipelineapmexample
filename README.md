@@ -1,9 +1,13 @@
 # Pipeline APM example
 Just a toy example of pipeline that consist of several java processes communicating by sockets.
  
-This is a desirable result in APM Kibana.
+This is a desirable result in APM Kibana, created with GIMP.
 
-![It would be nice to have something like this](imgs/apm-example.png?raw=true "APM Kibana: Expected")
+![It would be nice to have something like this](imgs/apm-example.png?raw=true "APM Kibana: Expected with parent")
+
+Other possible option might be the same only without parent transaction.
+
+![It would be nice to have something like this](imgs/apm-example2.png?raw=true "APM Kibana: Expected wihtout parent")
 
 
 ## Quick start
