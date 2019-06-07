@@ -86,7 +86,7 @@ Processor "Business logic" is executed in [`PipelineProcessor.thisIsActuallyABus
     }
 ``` 
 
-For current version of code actual result is: parent transaction is closed after 3 seconds, e.g. when `Source` completed
+For current version of code actual result is: parent transaction is closed after 3 seconds, e.g. when `Sink` completed
 "Business Logic"
 
 
