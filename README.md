@@ -62,6 +62,16 @@ Processor "Business logic" is executed in [`PipelineProcessor.thisIsActuallyABus
          }
     }
     
+    private Transaction getOrCreateTransaction(String message) {
+        Transaction transaction;
+        if (type == ProcessorType.SOURCE) {
+            transaction = ElasticApm.startTransaction();
+        } else {
+            transaction = ElasticApm.startTransactionWithRemoteParent(key -> extractKey(key, message));
+        }
+        transaction.setName(PARENT_TRANSACTION_NAME);
+        return transaction;
+    }
 
     private void injectParentTransactionId(String key, String value) {
         removeOldKey(key);
@@ -88,16 +98,6 @@ Processor "Business logic" is executed in [`PipelineProcessor.thisIsActuallyABus
         return Pattern.compile("<<<" + key + ":(.+);>>>");
     }
 
-    private Transaction getOrCreateTransaction(String message) {
-        Transaction transaction;
-        if (type == ProcessorType.SOURCE) {
-            transaction = ElasticApm.startTransaction();
-        } else {
-            transaction = ElasticApm.startTransactionWithRemoteParent(key -> extractKey(key, message));
-        }
-        transaction.setName(PARENT_TRANSACTION_NAME);
-        return transaction;
-    }
 ``` 
 
 For current version of code actual result is: parent transaction duration is 3 seconds, time of Business Logic of 1 processor

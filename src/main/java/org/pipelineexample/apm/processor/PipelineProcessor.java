@@ -56,6 +56,17 @@ public class PipelineProcessor {
         }
     }
 
+    private Transaction getOrCreateTransaction(String message) {
+        Transaction transaction;
+        if (type == ProcessorType.SOURCE) {
+            transaction = ElasticApm.startTransaction();
+        } else {
+            transaction = ElasticApm.startTransactionWithRemoteParent(key -> extractKey(key, message));
+        }
+        transaction.setName(PARENT_TRANSACTION_NAME);
+        return transaction;
+    }
+
     /**
      * Some useful work.
      */
@@ -87,16 +98,4 @@ public class PipelineProcessor {
     private Pattern getKeyPattern(String key) {
         return Pattern.compile("<<<" + key + ":(.+);>>>");
     }
-
-    private Transaction getOrCreateTransaction(String message) {
-        Transaction transaction;
-        if (type == ProcessorType.SOURCE) {
-            transaction = ElasticApm.startTransaction();
-        } else {
-            transaction = ElasticApm.startTransactionWithRemoteParent(key -> extractKey(key, message));
-        }
-        transaction.setName(PARENT_TRANSACTION_NAME);
-        return transaction;
-    }
-
 }
