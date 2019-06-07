@@ -61,11 +61,8 @@ Processor "Business logic" is executed in [`PipelineProcessor.thisIsActuallyABus
 
 ``` 
 ## Actual result
- - only one transaction is created
- - duration of this transaction is only 3 seconds, e.g. execution time of single processor
- - parent transaction contains only one span for `Sink`
-
-![But we actually have this](imgs/actual_result.png?raw=true "APM Kibana: Actual")
+Several independent transactions is created, each having the same `selectId` for the given pipeline.
+If there is a query that can group transactions for the same `selectId` it will also work for us.
 
 ## `follows_from` relation
 It could also be OK for us not to have parent transaction, but have span following one after another, like
