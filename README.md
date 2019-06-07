@@ -57,6 +57,33 @@ Processor "Business logic" is executed in [`PipelineProcessor.thisIsActuallyABus
              }
          }
     }
+    
+    private void injectParentTransactionId(String key, String value) {
+         if (extractKey(key, message) == null) {
+              message += ("<<<"+ key +":" +value + ">>>");
+         }
+    }
+    
+    private String extractKey(String key, String message) {
+         Matcher matcher = KEY_VAL_PATTERN.matcher(message);
+         while (matcher.find()) {
+             if (key.equals(matcher.group(1))) {
+                  return matcher.group(2);
+             }
+         }
+         return null;
+    }
+    
+    private Transaction getOrCreateTransaction(String message) {
+        Transaction transaction;
+        if (type == ProcessorType.SOURCE) {
+            transaction = ElasticApm.startTransaction();
+        } else {
+             transaction = ElasticApm.startTransactionWithRemoteParent(key -> extractKey(key, message));
+        }
+        transaction.setName(PARENT_TRANSACTION_NAME);
+        return transaction;
+    }
 ``` 
 
 For current version of code actual result is: parent transaction is closed after 3 seconds, e.g. when `Source` completed
