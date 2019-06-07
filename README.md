@@ -20,9 +20,10 @@ Run
 ## More details
 Gradle task `runPipeline` builds project and execute result jar file several times, to create a pipeline that consist of several
 java processes (one for each [processor](src/main/java/org/pipelineexample/apm/processor/PipelineProcessor.java)).
-Number of processors and ports that they use for sending/receiving messages is defined in [pipeline.properties](pipeline.properties). 
+Number of processors and ports that they use for sending/receiving messages is defined in [pipeline.properties](pipeline.properties).
+Also random int is generated, the same for the whole pipeline and is passed as `selectId` parameter. 
 Each [processor](src/main/java/org/pipelineexample/apm/processor/PipelineProcessor.java) except `Source`(just a fancy name for the first [processor](src/main/java/org/pipelineexample/apm/processor/PipelineProcessor.java), last is `Sink`) waits for message on incoming port,
-process it and write new message to outgoing port. `Source` does not read message, it just sends "First message" string.
+process it and write new message to outgoing port. `Source` does not read message, it just sends "Do something with selectId:" + selectId string.
 
 ```
      +---------+         +----------+         +----------+           +----------+
@@ -42,61 +43,21 @@ Processor "Business logic" is executed in [`PipelineProcessor.thisIsActuallyABus
 
 ```java
     private String processMessage(String message) throws InterruptedException {
-         this.message = message;
-         Transaction parentTransaction = getOrCreateTransaction(message);
-         Span span = parentTransaction.startSpan();
-         try {
-             span.setName(name);
-             thisIsActuallyABusinessLogic();
-             parentTransaction.injectTraceHeaders(this::injectParentTransactionId);
-             return this.message + " processed by " + name;
-         } catch (Exception e) {
-             parentTransaction.captureException(e);
-             span.captureException(e);
-             throw e;
-         } finally {
-             span.end();
-             if (type == ProcessorType.SINK) {
-                 parentTransaction.end();
-             }
-         }
-    }
-    
-    private Transaction getOrCreateTransaction(String message) {
-        Transaction transaction;
-        if (type == ProcessorType.SOURCE) {
-            transaction = ElasticApm.startTransaction();
-        } else {
-            transaction = ElasticApm.startTransactionWithRemoteParent(key -> extractKey(key, message));
-        }
-        transaction.setName(PARENT_TRANSACTION_NAME);
-        return transaction;
-    }
+           this.message = message;
+           Transaction transaction = ElasticApm.startTransaction()
+                   .setName(PARENT_TRANSACTION_NAME + "-" + name)
+                   .addLabel("selectId", selectId);
+           try {
+               thisIsActuallyABusinessLogic();
+               return this.message + ", Processed by " +name;
+           } catch (Exception e) {
+               transaction.captureException(e);
+               throw e;
+           } finally {
+               transaction.end();
+           }
+       }
 
-    private void injectParentTransactionId(String key, String value) {
-        removeOldKey(key);
-        message = " <<<" + key + ":" + value + ";>>>" + message;
-    }
-
-    private void removeOldKey(String key) {
-        Pattern pattern = getKeyPattern(key);
-        Matcher matcher = pattern.matcher(message);
-        if (matcher.find()) {
-            message = message.substring(0, matcher.start()) + message.substring(matcher.end());
-        }
-    }
-
-    private String extractKey(String key, String message) {
-        Matcher matcher = getKeyPattern(key).matcher(message);
-        if (matcher.find()) {
-            return matcher.group(1);
-        }
-        return null;
-    }
-
-    private Pattern getKeyPattern(String key) {
-        return Pattern.compile("<<<" + key + ":(.+);>>>");
-    }
 
 ``` 
 ## Actual result
