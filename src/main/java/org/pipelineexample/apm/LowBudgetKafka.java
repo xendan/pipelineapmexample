@@ -14,12 +14,14 @@ public class LowBudgetKafka {
 
     private final int inPort;
     private final int outPort;
+    private final String selectId;
     private final InfoConsole infoConsole;
     private boolean burnCpus;
 
-    public LowBudgetKafka(int inPort, int outPort, InfoConsole infoConsole, boolean burnCpus) {
+    public LowBudgetKafka(int inPort, int outPort, String selectId,  InfoConsole infoConsole, boolean burnCpus) {
         this.inPort = inPort;
         this.outPort = outPort;
+        this.selectId = selectId;
         this.infoConsole = infoConsole;
         this.burnCpus = burnCpus;
     }
@@ -27,7 +29,7 @@ public class LowBudgetKafka {
 
     public void sendMessage(String message) throws IOException, InterruptedException {
         if (outPort == -1) {
-            infoConsole.info(END_MESSAGE);
+            infoConsole.info("End of process selectId:" + selectId);
         } else {
             infoConsole.info("Sending : \"" + message + "\" to port " + outPort);
             try(ServerSocket serverSocket = new ServerSocket(outPort);
@@ -47,7 +49,7 @@ public class LowBudgetKafka {
     public String readMessage() throws IOException, InterruptedException {
         infoConsole.info("**** Started ****");
         if (inPort == -1) {
-            return FIRST_MESSAGE;
+            return "Do something with selectId:" + selectId;
         }
         while (true) {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();

@@ -13,15 +13,17 @@ import java.util.regex.Pattern;
 
 public class PipelineProcessor {
 
-    private static final String PARENT_TRANSACTION_NAME = "apmToyExampleParentTransaction";
+    private static final String PARENT_TRANSACTION_NAME = "apmToyExampleParentTransactionWithSelectId";
 
     private final String name;
+    private final String selectId;
     private final LowBudgetKafka communicationChannel;
     private final ProcessorType type;
     private String message;
 
-    public PipelineProcessor(String name, LowBudgetKafka communicationChannel, ProcessorType type) {
+    public PipelineProcessor(String name, String selectId, LowBudgetKafka communicationChannel, ProcessorType type) {
         this.name = name;
+        this.selectId = selectId;
         this.communicationChannel = communicationChannel;
         this.type = type;
     }
@@ -37,34 +39,18 @@ public class PipelineProcessor {
      */
     private String processMessage(String message) throws InterruptedException {
         this.message = message;
-        Transaction parentTransaction = getOrCreateTransaction(message);
-        Span span = parentTransaction.startSpan();
+        Transaction transaction = ElasticApm.startTransaction()
+                .setName(PARENT_TRANSACTION_NAME + "-" + name)
+                .addLabel("selectId", selectId);
         try {
-            span.setName(name);
             thisIsActuallyABusinessLogic();
-            parentTransaction.injectTraceHeaders(this::injectParentTransactionId);
-            return this.message + " processed by " + name;
+            return this.message + ", Processed by " +name;
         } catch (Exception e) {
-            parentTransaction.captureException(e);
-            span.captureException(e);
+            transaction.captureException(e);
             throw e;
         } finally {
-            span.end();
-            if (type == ProcessorType.SINK) {
-                parentTransaction.end();
-            }
+            transaction.end();
         }
-    }
-
-    private Transaction getOrCreateTransaction(String message) {
-        Transaction transaction;
-        if (type == ProcessorType.SOURCE) {
-            transaction = ElasticApm.startTransaction();
-        } else {
-            transaction = ElasticApm.startTransactionWithRemoteParent(key -> extractKey(key, message));
-        }
-        transaction.setName(PARENT_TRANSACTION_NAME);
-        return transaction;
     }
 
     /**
@@ -72,30 +58,5 @@ public class PipelineProcessor {
      */
     private void thisIsActuallyABusinessLogic() throws InterruptedException {
         TimeUnit.SECONDS.sleep(3);
-    }
-
-    private void injectParentTransactionId(String key, String value) {
-        removeOldKey(key);
-        message = " <<<" + key + ":" + value + ";>>>" + message;
-    }
-
-    private void removeOldKey(String key) {
-        Pattern pattern = getKeyPattern(key);
-        Matcher matcher = pattern.matcher(message);
-        if (matcher.find()) {
-            message = message.substring(0, matcher.start()) + message.substring(matcher.end());
-        }
-    }
-
-    private String extractKey(String key, String message) {
-        Matcher matcher = getKeyPattern(key).matcher(message);
-        if (matcher.find()) {
-            return matcher.group(1);
-        }
-        return null;
-    }
-
-    private Pattern getKeyPattern(String key) {
-        return Pattern.compile("<<<" + key + ":(.+);>>>");
     }
 }

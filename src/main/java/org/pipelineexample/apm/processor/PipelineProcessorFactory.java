@@ -26,15 +26,15 @@ public class PipelineProcessorFactory {
         this.ports = ports;
     }
 
-    public PipelineProcessor buildPipelineProcessor(String arg, boolean burnCpus) {
-        Integer currentNumber = Integer.valueOf(arg);
+    public PipelineProcessor buildPipelineProcessor(String numberStr, String selectId, boolean burnCpus) {
+        Integer currentNumber = Integer.valueOf(numberStr);
         ProcessorType type = getType(currentNumber);
         String name = getName(currentNumber, type);
         int inPort = getPort(currentNumber, true);
         int outPort = getPort(currentNumber, false);
         InfoConsole infoConsole = new InfoConsole(name);
-        LowBudgetKafka kafka = new LowBudgetKafka(inPort, outPort, infoConsole, burnCpus);
-        return new PipelineProcessor(name, kafka, type);
+        LowBudgetKafka kafka = new LowBudgetKafka(inPort, outPort, selectId, infoConsole, burnCpus);
+        return new PipelineProcessor(name, selectId, kafka, type);
     }
 
     private int getPort(Integer currentNumber, boolean isIn) {
