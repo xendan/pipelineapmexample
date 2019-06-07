@@ -3,10 +3,9 @@ package org.pipelineexample.apm.processor;
 import co.elastic.apm.api.ElasticApm;
 import co.elastic.apm.api.Span;
 import co.elastic.apm.api.Transaction;
-import org.pipelineexample.apm.InfoConsole;
 import org.pipelineexample.apm.LowBudgetKafka;
 
-import java.io.*;
+import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -18,25 +17,19 @@ public class PipelineProcessor {
 
     private final String name;
     private final LowBudgetKafka communicationChannel;
-    private final InfoConsole infoConsole;
     private final ProcessorType type;
-    private final boolean burnCpus;
     private String message;
 
-    public PipelineProcessor(String name, LowBudgetKafka communicationChannel, InfoConsole infoConsole, ProcessorType type, boolean burnCpus) {
+    public PipelineProcessor(String name, LowBudgetKafka communicationChannel, ProcessorType type) {
         this.name = name;
         this.communicationChannel = communicationChannel;
-        this.infoConsole = infoConsole;
         this.type = type;
-        this.burnCpus = burnCpus;
     }
 
     public void process() throws InterruptedException, IOException {
-        infoConsole.info("**** Started ****");
         String inMessage = communicationChannel.readMessage();
         String outMessage = processMessage(inMessage);
         communicationChannel.sendMessage(outMessage);
-        sleepOrExit();
     }
 
     /**
@@ -106,11 +99,4 @@ public class PipelineProcessor {
         return transaction;
     }
 
-    private void sleepOrExit() throws InterruptedException {
-        while (burnCpus) {
-            infoConsole.info("~ ~~~~ ZZZZ - zzzz - zzzzz ~~~~~~~~~ ~~~ z ~~~~ ~ ~ z ~ ~");
-            TimeUnit.HOURS.sleep(10);
-        }
-        infoConsole.info("**** Bye ****\n-----------------------------------------------------------------");
-    }
 }

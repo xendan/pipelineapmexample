@@ -15,15 +15,17 @@ public class LowBudgetKafka {
     private final int inPort;
     private final int outPort;
     private final InfoConsole infoConsole;
+    private boolean burnCpus;
 
-    public LowBudgetKafka(int inPort, int outPort, InfoConsole infoConsole) {
+    public LowBudgetKafka(int inPort, int outPort, InfoConsole infoConsole, boolean burnCpus) {
         this.inPort = inPort;
         this.outPort = outPort;
         this.infoConsole = infoConsole;
+        this.burnCpus = burnCpus;
     }
 
 
-    public void sendMessage(String message) throws IOException {
+    public void sendMessage(String message) throws IOException, InterruptedException {
         if (outPort == -1) {
             infoConsole.info(END_MESSAGE);
         } else {
@@ -35,9 +37,15 @@ public class LowBudgetKafka {
                 pw.println(message);
             }
         }
+        while (burnCpus) {
+            infoConsole.info("~ ~~~~ ZZZZ - zzzz - zzzzz ~~~~~~~~~ ~~~ z ~~~~ ~ ~ z ~ ~");
+            TimeUnit.HOURS.sleep(10);
+        }
+        infoConsole.info("**** Bye ****\n-------------------------------------------------------------------------------------");
     }
 
     public String readMessage() throws IOException, InterruptedException {
+        infoConsole.info("**** Started ****");
         if (inPort == -1) {
             return FIRST_MESSAGE;
         }
