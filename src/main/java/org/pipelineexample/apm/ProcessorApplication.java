@@ -1,5 +1,8 @@
 package org.pipelineexample.apm;
 
+import org.pipelineexample.apm.processor.PipelineProcessor;
+import org.pipelineexample.apm.processor.PipelineProcessorFactory;
+
 import java.io.IOException;
 
 /**

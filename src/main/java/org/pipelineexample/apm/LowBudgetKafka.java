@@ -28,13 +28,12 @@ public class LowBudgetKafka {
             infoConsole.info(END_MESSAGE);
         } else {
             infoConsole.info("Sending : \"" + message + "\" to port " + outPort);
-            ServerSocket serverSocket = new ServerSocket(outPort);
-            Socket socket = serverSocket.accept();
-            OutputStream os = socket.getOutputStream();
-            PrintWriter pw = new PrintWriter(os, true);
-            pw.println(message);
-            pw.close();
-            socket.close();
+            try(ServerSocket serverSocket = new ServerSocket(outPort);
+                Socket socket = serverSocket.accept();
+                OutputStream os = socket.getOutputStream();
+                PrintWriter pw = new PrintWriter(os, true)) {
+                pw.println(message);
+            }
         }
     }
 
@@ -42,10 +41,6 @@ public class LowBudgetKafka {
         if (inPort == -1) {
             return FIRST_MESSAGE;
         }
-        return readFromSocket();
-    }
-
-    private String readFromSocket() throws IOException, InterruptedException {
         while (true) {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             try (Socket client = new Socket(LOCALHOST, inPort);
@@ -70,4 +65,5 @@ public class LowBudgetKafka {
             }
         }
     }
+
 }

@@ -1,8 +1,10 @@
-package org.pipelineexample.apm;
+package org.pipelineexample.apm.processor;
 
 import co.elastic.apm.api.ElasticApm;
 import co.elastic.apm.api.Span;
 import co.elastic.apm.api.Transaction;
+import org.pipelineexample.apm.InfoConsole;
+import org.pipelineexample.apm.LowBudgetKafka;
 
 import java.io.*;
 import java.util.concurrent.TimeUnit;
@@ -13,7 +15,6 @@ import java.util.regex.Pattern;
 public class PipelineProcessor {
 
     private static final String PARENT_TRANSACTION_NAME = "apmToyExampleParentTransaction";
-    private static final Pattern KEY_VAL_PATTERN = Pattern.compile("<<<(.+):(.+)>>>");
 
     private final String name;
     private final LowBudgetKafka communicationChannel;
@@ -31,19 +32,11 @@ public class PipelineProcessor {
     }
 
     public void process() throws InterruptedException, IOException {
-        infoConsole.info( "**** Started ****");
+        infoConsole.info("**** Started ****");
         String inMessage = communicationChannel.readMessage();
         String outMessage = processMessage(inMessage);
         communicationChannel.sendMessage(outMessage);
         sleepOrExit();
-    }
-
-    private void sleepOrExit() throws InterruptedException {
-        while (burnCpus) {
-            infoConsole.info("~ ~~~~ ZZZZ - zzzz - zzzzz ~~~~~~~~~ ~~~ z ~~~~ ~ ~ z ~ ~");
-            TimeUnit.HOURS.sleep(10);
-        }
-        infoConsole.info("**** Bye ****\n-----------------------------------------------------------------");
     }
 
     /**
@@ -78,19 +71,28 @@ public class PipelineProcessor {
     }
 
     private void injectParentTransactionId(String key, String value) {
-        if (extractKey(key, message) == null) {
-            message += ("<<<"+ key +":" +value + ">>>");
+        removeOldKey(key);
+        message = " <<<" + key + ":" + value + ";>>>" + message;
+    }
+
+    private void removeOldKey(String key) {
+        Pattern pattern = getKeyPattern(key);
+        Matcher matcher = pattern.matcher(message);
+        if (matcher.find()) {
+            message = message.substring(0, matcher.start()) + message.substring(matcher.end());
         }
     }
 
     private String extractKey(String key, String message) {
-        Matcher matcher = KEY_VAL_PATTERN.matcher(message);
-        while (matcher.find()) {
-            if (key.equals(matcher.group(1))) {
-                return matcher.group(2);
-            }
+        Matcher matcher = getKeyPattern(key).matcher(message);
+        if (matcher.find()) {
+            return matcher.group(1);
         }
         return null;
+    }
+
+    private Pattern getKeyPattern(String key) {
+        return Pattern.compile("<<<" + key + ":(.+);>>>");
     }
 
     private Transaction getOrCreateTransaction(String message) {
@@ -104,4 +106,11 @@ public class PipelineProcessor {
         return transaction;
     }
 
+    private void sleepOrExit() throws InterruptedException {
+        while (burnCpus) {
+            infoConsole.info("~ ~~~~ ZZZZ - zzzz - zzzzz ~~~~~~~~~ ~~~ z ~~~~ ~ ~ z ~ ~");
+            TimeUnit.HOURS.sleep(10);
+        }
+        infoConsole.info("**** Bye ****\n-----------------------------------------------------------------");
+    }
 }

@@ -19,9 +19,9 @@ Run
 
 ## More details
 Gradle task `runPipeline` builds project and execute result jar file several times, to create a pipeline that consist of several
-java processes (one for each [processor](src/main/java/org/pipelineexample/apm/PipelineProcessor.java)). 
+java processes (one for each [processor](src/main/java/org/pipelineexample/apm/processor/PipelineProcessor.java)).
 Number of processors and ports that they use for sending/receiving messages is defined in [pipeline.properties](pipeline.properties). 
-Each [processor](src/main/java/org/pipelineexample/apm/PipelineProcessor.java) except `Source`(just a fancy name for the first [processor](src/main/java/org/pipelineexample/apm/PipelineProcessor.java), last is `Sink`) waits for message on incoming port, 
+Each [processor](src/main/java/org/pipelineexample/apm/PipelineProcessor.java) except `Source`(just a fancy name for the first [processor](src/main/java/org/pipelineexample/apm/processor/PipelineProcessor.java), last is `Sink`) waits for message on incoming port,
 process it and write new message to outgoing port. `Source` does not read message, it just sends "First message" string.
 
 ```
@@ -31,14 +31,14 @@ process it and write new message to outgoing port. `Source` does not read messag
      +---------+         +----------+         +----------+           +----------+
 ```
 
-Processor "Business logic" is executed in [`PipelineProcessor.thisIsActuallyABusinessLogic`](src/main/java/org/pipelineexample/apm/PipelineProcessor.java)
+Processor "Business logic" is executed in [`PipelineProcessor.thisIsActuallyABusinessLogic`](src/main/java/org/pipelineexample/apm/processor/PipelineProcessor.java)
 
 ```java
     private void thisIsActuallyABusinessLogic() throws InterruptedException {
         TimeUnit.SECONDS.sleep(3);
     }
 ```
-[`PipelineProcessor.processMessage`](src/main/java/org/pipelineexample/apm/PipelineProcessor.java) is used to wrap this logic with APM Transactions 
+[`PipelineProcessor.processMessage`](src/main/java/org/pipelineexample/apm/processor/PipelineProcessor.java) is used to wrap this logic with APM Transactions
 
 ```java
     private String processMessage(String message) throws InterruptedException {
@@ -62,28 +62,38 @@ Processor "Business logic" is executed in [`PipelineProcessor.thisIsActuallyABus
          }
     }
     
+
     private void injectParentTransactionId(String key, String value) {
-         if (extractKey(key, message) == null) {
-              message += ("<<<"+ key +":" +value + ">>>");
-         }
+        removeOldKey(key);
+        message = " <<<" + key + ":" + value + ";>>>" + message;
     }
-    
+
+    private void removeOldKey(String key) {
+        Pattern pattern = getKeyPattern(key);
+        Matcher matcher = pattern.matcher(message);
+        if (matcher.find()) {
+            message = message.substring(0, matcher.start()) + message.substring(matcher.end());
+        }
+    }
+
     private String extractKey(String key, String message) {
-         Matcher matcher = KEY_VAL_PATTERN.matcher(message);
-         while (matcher.find()) {
-             if (key.equals(matcher.group(1))) {
-                  return matcher.group(2);
-             }
-         }
-         return null;
+        Matcher matcher = getKeyPattern(key).matcher(message);
+        if (matcher.find()) {
+            return matcher.group(1);
+        }
+        return null;
     }
-    
+
+    private Pattern getKeyPattern(String key) {
+        return Pattern.compile("<<<" + key + ":(.+);>>>");
+    }
+
     private Transaction getOrCreateTransaction(String message) {
         Transaction transaction;
         if (type == ProcessorType.SOURCE) {
             transaction = ElasticApm.startTransaction();
         } else {
-             transaction = ElasticApm.startTransactionWithRemoteParent(key -> extractKey(key, message));
+            transaction = ElasticApm.startTransactionWithRemoteParent(key -> extractKey(key, message));
         }
         transaction.setName(PARENT_TRANSACTION_NAME);
         return transaction;
