@@ -14,7 +14,7 @@ Other possible option might be the same only without parent transaction.
 Create `apm.properties` file using your APM server properties, content should be similar to [apm.example.properties](apm.example.properties) file.
 Run
 ```
-./gradlew runPipeline
+./gradlew clean runPipeline
 ```
 
 ## More details
