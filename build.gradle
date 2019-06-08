@@ -66,13 +66,31 @@ task runPipeline {
              
         def props = new Properties()
         file("pipeline.properties").withInputStream { props.load(it) }
-        def portsStr = props.getProperty("ports")
+
         def burnCpus = props.getProperty("burnCpus");
-        def total = portsStr.split(",").length + 1;
+
+        def ports = props.getProperty("ports").split(",")
+        def total = ports.length + 1
 
         def taskExecutor = Executors.newFixedThreadPool(total)
         1.upto(total, {
-            def num = it            
+            def processorName
+            def inPort
+            def outPort
+
+            if (it == 1) {
+                processorName = "Source"
+                inPort = -1
+                outPort = ports[0]
+            } else if (it == total) {
+                processorName = "Sink"
+                inPort = ports[total - 2]
+                outPort = -1
+            } else {
+                inPort = ports[it - 2]                
+                outPort = ports[it - 1]
+                processorName = "Processor-" + (it - 1)
+            }
             taskExecutor.execute({javaexec {
                 main="-javaagent:./elastic-apm-agent-${apmVersion}.jar"
                 args = ["-Delastic.apm.service_name=${apmProps.getProperty("elastic.apm.service_name")}",
@@ -80,7 +98,7 @@ task runPipeline {
                         "-Delastic.apm.secret_token=${apmProps.getProperty("elastic.apm.secret_token")}",
                         "-Delastic.apm.application_packages=${apmProps.getProperty("elastic.apm.application_packages")}",
                         "-jar",
-                        jar.archivePath, num, portsStr, burnCpus]
+                        jar.archivePath, processorName, inPort, outPort, burnCpus]
                 }
             })
         })
