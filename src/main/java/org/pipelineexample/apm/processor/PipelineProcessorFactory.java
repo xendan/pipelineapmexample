@@ -1,11 +1,7 @@
 package org.pipelineexample.apm.processor;
 
 import org.pipelineexample.apm.InfoConsole;
-import org.pipelineexample.apm.LowBudgetKafka;
-
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import org.pipelineexample.apm.communication.LowBudgetKafka;
 
 public class PipelineProcessorFactory {
 

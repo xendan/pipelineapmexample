@@ -1,6 +1,6 @@
-package org.pipelineexample.apm;
+package org.pipelineexample.apm.communication;
 
-import org.pipelineexample.apm.processor.CommunicationChannel;
+import org.pipelineexample.apm.InfoConsole;
 
 import java.io.*;
 import java.net.ConnectException;

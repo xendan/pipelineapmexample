@@ -3,6 +3,7 @@ package org.pipelineexample.apm.processor;
 import co.elastic.apm.api.ElasticApm;
 import co.elastic.apm.api.Span;
 import co.elastic.apm.api.Transaction;
+import org.pipelineexample.apm.communication.CommunicationChannel;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;

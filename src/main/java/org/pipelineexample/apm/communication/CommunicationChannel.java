@@ -1,4 +1,4 @@
-package org.pipelineexample.apm.processor;
+package org.pipelineexample.apm.communication;
 
 import java.io.IOException;
 
