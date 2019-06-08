@@ -1,12 +1,14 @@
 package org.pipelineexample.apm;
 
+import org.pipelineexample.apm.processor.CommunicationChannel;
+
 import java.io.*;
 import java.net.ConnectException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.TimeUnit;
 
-public class LowBudgetKafka {
+public class LowBudgetKafka implements CommunicationChannel {
 
     private static final String LOCALHOST = "127.0.0.1";
     private static final String FIRST_MESSAGE = "First Message";
@@ -24,7 +26,7 @@ public class LowBudgetKafka {
         this.burnCpus = burnCpus;
     }
 
-
+    @Override
     public void sendMessage(String message) throws IOException, InterruptedException {
         if (outPort == -1) {
             infoConsole.info(END_MESSAGE);
@@ -44,6 +46,7 @@ public class LowBudgetKafka {
         infoConsole.info("**** Bye ****\n-------------------------------------------------------------------------------------");
     }
 
+    @Override
     public String readMessage() throws IOException, InterruptedException {
         infoConsole.info("**** Started ****");
         if (inPort == -1) {

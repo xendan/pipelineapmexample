@@ -3,7 +3,6 @@ package org.pipelineexample.apm.processor;
 import co.elastic.apm.api.ElasticApm;
 import co.elastic.apm.api.Span;
 import co.elastic.apm.api.Transaction;
-import org.pipelineexample.apm.LowBudgetKafka;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
@@ -16,11 +15,11 @@ public class PipelineProcessor {
     private static final String PARENT_TRANSACTION_NAME = "apmToyExampleParentTransaction";
 
     private final String name;
-    private final LowBudgetKafka communicationChannel;
+    private final CommunicationChannel communicationChannel;
     private final ProcessorType type;
     private String message;
 
-    public PipelineProcessor(String name, LowBudgetKafka communicationChannel, ProcessorType type) {
+    public PipelineProcessor(String name, CommunicationChannel communicationChannel, ProcessorType type) {
         this.name = name;
         this.communicationChannel = communicationChannel;
         this.type = type;
